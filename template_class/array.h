@@ -12,8 +12,9 @@ class array_template
   public:
     array_template(Type);
     ~array_template();
-    Type operator[](const int);
-    Type &operator[](const int);
+    //  Type operator[](const array_template<Type, n> &);
+    Type operator[](const int &) const;
+    Type &operator[](const int &);
 };
 
 template <class Type, int n>
@@ -32,13 +33,11 @@ array_template<Type, n>::~array_template()
 }
 
 template <class Type, int n>
-Type array_template<Type, n>::operator[](const int num)
+Type array_template<Type, n>::operator[](const int &num) const
 {
 }
-
 template <class Type, int n>
-Type &array_template<Type, n>::operator[](const int num)
+Type &array_template<Type, n>::operator[](const int &num)
 {
 }
-
 #endif /* ARRAY_H */
