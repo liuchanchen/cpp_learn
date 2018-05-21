@@ -24,8 +24,17 @@ static int test_my_exception(void)
 int main(int argc, char **argv)
 {
     my_excption my_excep;
+    exception std_excep;
 
-    test_my_exception();
+    try
+    {
+        my_excep.test_no_except();
+    }
+    catch (exception std_excep)
+    {
+        cout << "exception captured" << endl;
+    }
+    //   test_my_exception();
 
     return 0;
 }

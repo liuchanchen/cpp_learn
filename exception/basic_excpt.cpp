@@ -14,3 +14,13 @@ const char *my_excption::what()
 {
     return "my_excption caught";
 }
+
+int my_excption::test_no_except() NOEXCEP_FLAG
+{
+    exception err;
+
+    std::cout << "test_no_except" << std::endl;
+    throw err;
+
+    return 0;
+}
