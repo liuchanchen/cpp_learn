@@ -1,19 +1,16 @@
-#include <exception>
+#include "basic_excpt.h"
 #include <iostream>
-
-class my_excption : public exception
-{
-  public:
-    my_excption(void);
-    virtual ~my_excption();
-};
 
 my_excption::my_excption()
 {
     std::cout << "entry my_excption" << std::endl;
 }
 
+my_excption::~my_excption() throw()
+{
+}
+
 const char *my_excption::what()
 {
-    std::cout << "my_excption caught" << std::endl;
+    return "my_excption caught";
 }
