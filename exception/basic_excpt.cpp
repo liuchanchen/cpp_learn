@@ -15,6 +15,11 @@ const char *my_excption::what()
     return "my_excption caught";
 }
 
+int my_excption::test_no_except(int arg) NOEXCEP_FLAG
+{
+    return 0;
+}
+
 int my_excption::test_no_except() NOEXCEP_FLAG
 {
     exception err;
@@ -22,5 +27,15 @@ int my_excption::test_no_except() NOEXCEP_FLAG
     std::cout << "test_no_except" << std::endl;
     throw err;
 
+    return 0;
+}
+
+int override_func(void)
+{
+    return 0;
+}
+
+int override_func(int)
+{
     return 0;
 }

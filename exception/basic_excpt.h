@@ -13,6 +13,7 @@ class my_excption : public std::exception
 public:
   my_excption(void);
   int test_no_except() NOEXCEP_FLAG;
+  int test_no_except(int) NOEXCEP_FLAG;
   virtual ~my_excption() throw();
   virtual const char *what();
 };
