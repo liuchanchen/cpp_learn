@@ -10,7 +10,7 @@ private:
   size_t size;
   // T *data;
   char *data;
-#define COPY_CONS (0)
+#define COPY_CONS (1)
 public:
   explicit move_class(int len) : size(len), data(nullptr)
   {
