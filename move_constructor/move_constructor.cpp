@@ -18,7 +18,7 @@ int compare_move_copy()
 int vector_ops()
 {
     // Create a vector object and add a few elements to it.
-    vector<move_class<char>> v;
+    vector<move_class<char>>;
     //    v.push_back(move_class(25));
     //    v.push_back(MemoryBlock(75));
     //
