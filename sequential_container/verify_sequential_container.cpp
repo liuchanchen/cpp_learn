@@ -18,26 +18,25 @@ class sequential_container_verification
 };
 
 template <typename T, template <typename T1, typename _Allocator = std::allocator<T1>> class sequentail_container_type>
-class sequential_container_verification<T, sequentail_container_type>::check_location(sequentail_container_type<T> &templ_container)
+bool sequential_container_verification<T, sequentail_container_type>::check_location(sequentail_container_type<T> &templ_container)
 {
 
     return true;
 }
 
 template <typename T, template <typename T1, typename _Allocator = std::allocator<T1>> class sequentail_container_type>
-class sequential_container_verification<T, sequentail_container_type>::check_location(sequentail_container_type<T> &container)
+bool sequential_container_verification<T, sequentail_container_type>::check_time_cost(sequentail_container_type<T> &container)
 {
     return true;
 }
 
 template <typename T, template <typename T1, typename _Allocator = std::allocator<T1>> class sequentail_container_type>
-class sequential_container_verification<T, sequentail_container_type>::check_location(sequentail_container_type<T> &container)
+bool sequential_container_verification<T, sequentail_container_type>::check_member(sequentail_container_type<T> &container)
 {
     return true;
 }
 
-bool
-verify_sequential_container()
+bool verify_sequential_container()
 {
     return true;
 }
