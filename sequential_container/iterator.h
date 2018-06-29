@@ -63,4 +63,5 @@ bool container_test<T, Templ_class>::find_a_elem_in_contanier(Templ_class<T> tem
 extern int find_elem_in_vector();
 extern int find_elem_in_list();
 extern int find_elem_in_move_vector();
+extern int swap_two_vector();
 #endif /* ITERATOR_H */

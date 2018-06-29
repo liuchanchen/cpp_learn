@@ -81,3 +81,16 @@ int find_elem_in_move_vector()
 
     return 0;
 }
+
+int swap_two_vector()
+{
+    std::vector<int> vec1(20);
+    std::vector<int> vec2(10);
+    std::cout << "before swap "
+              << "vec1:" << vec1.size() << " vec2:" << vec2.size() << std::endl;
+    std::swap(vec1, vec2);
+    std::cout << "before swap "
+              << "vec1:" << vec1.size() << " vec2:" << vec2.size() << std::endl;
+
+    return 0;
+}
