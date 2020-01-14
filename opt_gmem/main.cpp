@@ -1,7 +1,7 @@
+#include <stdio.h>
 #include <sys/time.h>
 #include <iostream>
 #include <vector>
-#include <stdio.h>
 #include "opt_gmem.h"
 
 template <typename type_t>
@@ -72,30 +72,44 @@ int main(int argc, char **argv) {
     std::cout << "block gemm time cost:" << usec_diff(start, end) << std::endl;
     gettimeofday(&start, NULL);
     lopp_permutation_block_gemm<char>(M,
-                     N,
-                     K,
-                     matrix_A.matrix_data,
-                     matrix_B.matrix_data,
-                     matrix_C.matrix_data);
+                                      N,
+                                      K,
+                                      matrix_A.matrix_data,
+                                      matrix_B.matrix_data,
+                                      matrix_C.matrix_data);
     gettimeofday(&end, NULL);
-    std::cout << "lopp_permutation block gemm time cost:" << usec_diff(start, end) << std::endl;
+    std::cout << "lopp_permutation block gemm time cost:"
+              << usec_diff(start, end) << std::endl;
     gettimeofday(&start, NULL);
     cache_blocking_gemm<char>(M,
-                     N,
-                     K,
-                     matrix_A.matrix_data,
-                     matrix_B.matrix_data,
-                     matrix_C.matrix_data);
+                              N,
+                              K,
+                              matrix_A.matrix_data,
+                              matrix_B.matrix_data,
+                              matrix_C.matrix_data);
     gettimeofday(&end, NULL);
-    std::cout << "cache blocking gemm time cost:" << usec_diff(start, end) << std::endl;
+    std::cout << "cache blocking gemm time cost:" << usec_diff(start, end)
+              << std::endl;
     gettimeofday(&start, NULL);
     cache_write_gemm<char>(M,
-                     N,
-                     K,
-                     matrix_A.matrix_data,
-                     matrix_B.matrix_data,
-                     matrix_C.matrix_data);
+                           N,
+                           K,
+                           matrix_A.matrix_data,
+                           matrix_B.matrix_data,
+                           matrix_C.matrix_data);
     gettimeofday(&end, NULL);
-    std::cout << "cache write gemm time cost:" << usec_diff(start, end) << std::endl;
+    std::cout << "cache write gemm time cost:" << usec_diff(start, end)
+              << std::endl;
+    gettimeofday(&start, NULL);
+    openmp_gemm<char>(M,
+                      N,
+                      K,
+                      matrix_A.matrix_data,
+                      matrix_B.matrix_data,
+                      matrix_C.matrix_data);
+    gettimeofday(&end, NULL);
+    std::cout << "open mp gemm time cost:" << usec_diff(start, end)
+              << std::endl;
+
     return 0;
 }

@@ -1,11 +1,11 @@
 #ifndef TEST_SET_H
 #define TEST_SET_H
 #include <stdint.h>
-#include <vector>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <iostream>
+#include <vector>
 
 template <typename type_t>
 void normal_gemm(int                 M,
@@ -146,21 +146,39 @@ void cache_blocking_gemm(int                 M,
 
 template <typename type_t>
 void cache_write_gemm(int                 M,
-                 int                 N,
-                 int                 K,
-                 std::vector<type_t> A,
-                 std::vector<type_t> B,
-                 std::vector<type_t> C) {
+                      int                 N,
+                      int                 K,
+                      std::vector<type_t> A,
+                      std::vector<type_t> B,
+                      std::vector<type_t> C) {
     type_t temp[N];
     for (int i = 0; i < M; ++i) {
         for (int j = 0; j < N; ++j) {
             type_t cij = C[i * N + j]; /* cij = C[i][j] */
             for (int k = 0; k < K; k++)
                 cij += A[i * K + k] * B[k * N + j]; /* cij += A[i][k]*B[k][j] */
-            //C[i * N + j] = cij;                     /* C[i][j] = cij */
+            // C[i * N + j] = cij;                     /* C[i][j] = cij */
             temp[j] = cij;
         }
         memcpy(&C[i * N], temp, N);
+    }
+}
+
+template <typename type_t>
+void openmp_gemm(int                 M,
+                 int                 N,
+                 int                 K,
+                 std::vector<type_t> A,
+                 std::vector<type_t> B,
+                 std::vector<type_t> C) {
+    for (int i = 0; i < M; ++i) {
+        #pragma omp parallel for
+        for (int j = 0; j < N; ++j) {
+            type_t cij = C[i * N + j]; /* cij = C[i][j] */
+            for (int k = 0; k < K; k++)
+                cij += A[i * K + k] * B[k * N + j]; /* cij += A[i][k]*B[k][j] */
+            C[i * N + j] = cij;                     /* C[i][j] = cij */
+        }
     }
 }
 

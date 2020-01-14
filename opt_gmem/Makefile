@@ -1,6 +1,6 @@
 #CXX=clang++
 CXX=g++
-CXXFLAGS=-g -std=c++11 -Wall -O3
+CXXFLAGS=-g -std=c++11 -Wall -O3 -fopenmp
 BIN=prog
 
 SRC=$(wildcard *.cpp)
@@ -8,7 +8,7 @@ OBJ=$(SRC:%.cpp=%.o)
 
 all:$(OBJ)
 	echo $^
-	$(CXX) -o $(BIN) $^
+	$(CXX) -o $(BIN) $^ -fopenmp
 
 %.o: %.cpp
 	$(CXX) -c  $< -o  $@ $(CXXFLAGS)
