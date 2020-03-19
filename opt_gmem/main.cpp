@@ -37,8 +37,8 @@ static inline int64_t usec_diff(struct timeval start, struct timeval end) {
 
 int main(int argc, char **argv) {
     int                M = 1024;
-    int                K = 256;
-    int                N = 2048;
+    int                K = 1024;
+    int                N = 1024;
     struct timeval     start;
     struct timeval     end;
     matrix_class<char> matrix_A(M, K), matrix_B(K, N), matrix_C(M, N);

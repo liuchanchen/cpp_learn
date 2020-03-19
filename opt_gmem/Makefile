@@ -1,6 +1,6 @@
 #CXX=clang++
 CXX=g++
-CXXFLAGS=-g -std=c++11 -Wall -O3 -fopenmp
+CXXFLAGS=-g -std=c++11 -Wall -O0 -fopenmp
 BIN=prog
 
 SRC=$(wildcard *.cpp)
