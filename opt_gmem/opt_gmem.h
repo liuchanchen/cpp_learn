@@ -76,6 +76,7 @@ void block_gemm(int                 M,
     }
 }
 
+#if 1
 template <typename type_t>
 void lopp_permutation_block_gemm(int                 M,
                                  int                 N,
@@ -118,6 +119,38 @@ void lopp_permutation_block_gemm(int                 M,
             amk[3][5] = A[(m + 3) * K + k + 5];
             amk[3][6] = A[(m + 3) * K + k + 6];
             amk[3][7] = A[(m + 3) * K + k + 7];
+            amk[4][0] = A[(m + 4) * K + k];
+            amk[4][1] = A[(m + 4) * K + k + 1];
+            amk[4][2] = A[(m + 4) * K + k + 2];
+            amk[4][3] = A[(m + 4) * K + k + 3];
+            amk[4][4] = A[(m + 4) * K + k + 4];
+            amk[4][5] = A[(m + 4) * K + k + 5];
+            amk[4][6] = A[(m + 4) * K + k + 6];
+            amk[4][7] = A[(m + 4) * K + k + 7];
+            amk[5][0] = A[(m + 5) * K + k];
+            amk[5][1] = A[(m + 5) * K + k + 1];
+            amk[5][2] = A[(m + 5) * K + k + 2];
+            amk[5][3] = A[(m + 5) * K + k + 3];
+            amk[5][4] = A[(m + 5) * K + k + 4];
+            amk[5][5] = A[(m + 5) * K + k + 5];
+            amk[5][6] = A[(m + 5) * K + k + 6];
+            amk[5][7] = A[(m + 5) * K + k + 7];
+            amk[6][0] = A[(m + 6) * K + k];
+            amk[6][1] = A[(m + 6) * K + k + 1];
+            amk[6][2] = A[(m + 6) * K + k + 2];
+            amk[6][3] = A[(m + 6) * K + k + 3];
+            amk[6][4] = A[(m + 6) * K + k + 4];
+            amk[6][5] = A[(m + 6) * K + k + 5];
+            amk[6][6] = A[(m + 6) * K + k + 6];
+            amk[6][7] = A[(m + 6) * K + k + 7];
+            amk[7][0] = A[(m + 7) * K + k];
+            amk[7][1] = A[(m + 7) * K + k + 1];
+            amk[7][2] = A[(m + 7) * K + k + 2];
+            amk[7][3] = A[(m + 7) * K + k + 3];
+            amk[7][4] = A[(m + 7) * K + k + 4];
+            amk[7][5] = A[(m + 7) * K + k + 5];
+            amk[7][6] = A[(m + 7) * K + k + 6];
+            amk[7][7] = A[(m + 7) * K + k + 7];
             for (int n = 0; n < N; n = n + 8) {
                 C[m * K + n] += amk[0][0] * B[k * N + n]; 
                 C[m * K + n + 1] += amk[0][0] * B[k * N + n + 1]; 
@@ -151,10 +184,91 @@ void lopp_permutation_block_gemm(int                 M,
                 C[(m + 3) * K + n + 5] += amk[3][0] * B[k * N + n + 5]; 
                 C[(m + 3) * K + n + 6] += amk[3][0] * B[k * N + n + 6]; 
                 C[(m + 3) * K + n + 7] += amk[3][0] * B[k * N + n + 7]; 
+                C[(m + 4) * K + n + 0] += amk[4][0] * B[k * N + n]; 
+                C[(m + 4) * K + n + 1] += amk[4][0] * B[k * N + n + 1]; 
+                C[(m + 4) * K + n + 2] += amk[4][0] * B[k * N + n + 2]; 
+                C[(m + 4) * K + n + 3] += amk[4][0] * B[k * N + n + 3]; 
+                C[(m + 4) * K + n + 4] += amk[4][0] * B[k * N + n + 4]; 
+                C[(m + 4) * K + n + 5] += amk[4][0] * B[k * N + n + 5]; 
+                C[(m + 4) * K + n + 6] += amk[4][0] * B[k * N + n + 6]; 
+                C[(m + 4) * K + n + 7] += amk[4][0] * B[k * N + n + 7]; 
+                C[(m + 5) * K + n + 0] += amk[5][0] * B[k * N + n]; 
+                C[(m + 5) * K + n + 1] += amk[5][0] * B[k * N + n + 1]; 
+                C[(m + 5) * K + n + 2] += amk[5][0] * B[k * N + n + 2]; 
+                C[(m + 5) * K + n + 3] += amk[5][0] * B[k * N + n + 3]; 
+                C[(m + 5) * K + n + 4] += amk[5][0] * B[k * N + n + 4]; 
+                C[(m + 5) * K + n + 5] += amk[5][0] * B[k * N + n + 5]; 
+                C[(m + 5) * K + n + 6] += amk[5][0] * B[k * N + n + 6]; 
+                C[(m + 5) * K + n + 7] += amk[5][0] * B[k * N + n + 7]; 
+                C[(m + 6) * K + n + 0] += amk[6][0] * B[k * N + n]; 
+                C[(m + 6) * K + n + 1] += amk[6][0] * B[k * N + n + 1]; 
+                C[(m + 6) * K + n + 2] += amk[6][0] * B[k * N + n + 2]; 
+                C[(m + 6) * K + n + 3] += amk[6][0] * B[k * N + n + 3]; 
+                C[(m + 6) * K + n + 4] += amk[6][0] * B[k * N + n + 4]; 
+                C[(m + 6) * K + n + 5] += amk[6][0] * B[k * N + n + 5]; 
+                C[(m + 6) * K + n + 6] += amk[6][0] * B[k * N + n + 6]; 
+                C[(m + 6) * K + n + 7] += amk[6][0] * B[k * N + n + 7]; 
+                C[(m + 7) * K + n + 0] += amk[7][0] * B[k * N + n]; 
+                C[(m + 7) * K + n + 1] += amk[7][0] * B[k * N + n + 1]; 
+                C[(m + 7) * K + n + 2] += amk[7][0] * B[k * N + n + 2]; 
+                C[(m + 7) * K + n + 3] += amk[7][0] * B[k * N + n + 3]; 
+                C[(m + 7) * K + n + 4] += amk[7][0] * B[k * N + n + 4]; 
+                C[(m + 7) * K + n + 5] += amk[7][0] * B[k * N + n + 5]; 
+                C[(m + 7) * K + n + 6] += amk[7][0] * B[k * N + n + 6]; 
+                C[(m + 7) * K + n + 7] += amk[7][0] * B[k * N + n + 7]; 
             }
         }
     }
 }
+#else
+template <typename type_t>
+void lopp_permutation_block_gemm(int                 M,
+                                 int                 N,
+                                 int                 K,
+                                 std::vector<type_t> A,
+                                 std::vector<type_t> B,
+                                 std::vector<type_t> C) {
+    type_t amk[4][4];
+    for (int m = 0; m < M; m= m + 4) {
+        for (int k = 0; k < K; k+=4) {
+            amk[0][0] = A[m * K + k];
+            amk[0][1] = A[m * K + k + 1];
+            amk[0][2] = A[m * K + k + 2];
+            amk[0][3] = A[m * K + k + 3];
+            amk[1][0] = A[(m + 0) * K + k];
+            amk[1][1] = A[(m + 1) * K + k + 1];
+            amk[1][2] = A[(m + 1) * K + k + 2];
+            amk[1][3] = A[(m + 1) * K + k + 3];
+            amk[2][0] = A[(m + 2) * K + k];
+            amk[2][1] = A[(m + 2) * K + k + 1];
+            amk[2][2] = A[(m + 2) * K + k + 2];
+            amk[2][3] = A[(m + 2) * K + k + 3];
+            amk[3][0] = A[(m + 3) * K + k];
+            amk[3][1] = A[(m + 3) * K + k + 1];
+            amk[3][2] = A[(m + 3) * K + k + 2];
+            amk[3][3] = A[(m + 3) * K + k + 3];
+            for (int n = 0; n < N; n = n + 4) {
+                C[m * K + n] += amk[0][0] * B[k * N + n]; 
+                C[m * K + n + 1] += amk[0][0] * B[k * N + n + 1]; 
+                C[m * K + n + 2] += amk[0][0] * B[k * N + n + 2]; 
+                C[m * K + n + 3] += amk[0][0] * B[k * N + n + 3]; 
+                C[(m + 1) * K + n + 0] += amk[1][0] * B[k * N + n]; 
+                C[(m + 1) * K + n + 1] += amk[1][0] * B[k * N + n + 1]; 
+                C[(m + 1) * K + n + 2] += amk[1][0] * B[k * N + n + 2]; 
+                C[(m + 1) * K + n + 3] += amk[1][0] * B[k * N + n + 3]; 
+                C[(m + 2) * K + n + 0] += amk[2][0] * B[k * N + n]; 
+                C[(m + 2) * K + n + 1] += amk[2][0] * B[k * N + n + 1]; 
+                C[(m + 2) * K + n + 2] += amk[2][0] * B[k * N + n + 2]; 
+                C[(m + 2) * K + n + 3] += amk[2][0] * B[k * N + n + 3]; 
+                C[(m + 3) * K + n + 0] += amk[3][0] * B[k * N + n]; 
+                C[(m + 3) * K + n + 1] += amk[3][0] * B[k * N + n + 1]; 
+                C[(m + 3) * K + n + 2] += amk[3][0] * B[k * N + n + 2]; 
+                C[(m + 3) * K + n + 3] += amk[3][0] * B[k * N + n + 3]; 
+            }
+        }
+    }
+}
+#endif
 
 #define CACHE_BLOCKING_SIZE (64)
 #if 0
