@@ -1,6 +1,7 @@
 #CXX=clang++
 CXX=g++
-CXXFLAGS=-g -std=c++11 -Wall -O3 -fopenmp
+CXXFLAGS=-pg -g -std=c++11 -Wall -O3 -fopenmp
+LINKFLAGS=-pg -fopenmp
 BIN=prog
 
 SRC=$(wildcard *.cpp)
@@ -9,7 +10,7 @@ ASM=$(SRC:%.cpp=%.s)
 
 all:$(OBJ) $(ASM)
 	echo $^
-	$(CXX) -o $(BIN) $(OBJ) -fopenmp
+	$(CXX) -o $(BIN) $(OBJ) $(LINKFLAGS)
 
 %.o: %.cpp
 	$(CXX) -c  $< -o  $@ $(CXXFLAGS)
@@ -17,5 +18,5 @@ all:$(OBJ) $(ASM)
 	$(CXX) -S  $< -o  $@ $(CXXFLAGS)
 
 clean:
-	rm -f *.o *.s
+	rm -f *.o *.s *.out
 	rm $(BIN)

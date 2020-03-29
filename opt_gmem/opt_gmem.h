@@ -4,76 +4,60 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <iostream>
 #include <vector>
 
 template <typename type_t>
-void normal_gemm(int                 M,
-                 int                 N,
-                 int                 K,
-                 std::vector<type_t> A,
-                 std::vector<type_t> B,
-                 std::vector<type_t> C) {
-    for (int i = 0; i < M; ++i) {
-        for (int j = 0; j < N; ++j) {
-            type_t cij = C[i * N + j]; /* cij = C[i][j] */
-            for (int k = 0; k < K; k++)
-                cij += A[i * K + k] * B[k * N + j]; /* cij += A[i][k]*B[k][j] */
-            C[i * N + j] = cij;                     /* C[i][j] = cij */
-        }
+void normal_gemm(int M, int N, int K, std::vector<type_t> A, std::vector<type_t> B,
+                 std::vector<type_t>& C) {
+  for (int i = 0; i < M; ++i) {
+    for (int j = 0; j < N; ++j) {
+      type_t cij = C[i * N + j];                                      /* cij = C[i][j] */
+      for (int k = 0; k < K; k++) cij += A[i * K + k] * B[k * N + j]; /* cij += A[i][k]*B[k][j] */
+      C[i * N + j] = cij;                                             /* C[i][j] = cij */
     }
+  }
 }
 
 template <typename type_t>
-void lopp_permutation_gemm(int                 M,
-                           int                 N,
-                           int                 K,
-                           std::vector<type_t> A,
-                           std::vector<type_t> B,
-                           std::vector<type_t> C) {
-    for (int m = 0; m < M; ++m) {
-        for (int k = 0; k < K; k++) {
-            type_t amk       = A[m * K + k];
-            int    row_len   = k * N;
-            int    a_row_len = m * N;
-            for (int n = 0; n < N; ++n) {
-                C[a_row_len + n] +=
-                    amk * B[row_len + n]; /* cmn += A[m][k]*B[k][n] */
-            }
-        }
+void lopp_permutation_gemm(int M, int N, int K, std::vector<type_t> A, std::vector<type_t> B,
+                           std::vector<type_t>& C) {
+  for (int m = 0; m < M; ++m) {
+    for (int k = 0; k < K; k++) {
+      type_t amk = A[m * K + k];
+      int row_len = k * N;
+      int a_row_len = m * N;
+      for (int n = 0; n < N; ++n) {
+        C[a_row_len + n] += amk * B[row_len + n]; /* cmn += A[m][k]*B[k][n] */
+      }
     }
+  }
 }
 
 template <typename type_t>
-void block_gemm(int                 M,
-                int                 N,
-                int                 K,
-                std::vector<type_t> A,
-                std::vector<type_t> B,
-                std::vector<type_t> C) {
-    for (int i = 0; i < M; i = i + 1) {
-        for (int j = 0; j < N; j = j + 1) {
-            type_t cij = C[i * N + j]; /* cij = C[i][j] */
-            for (int k = 0; k < K; k = k + 4) {
-                cij += A[i * K + k] * B[k * N + j]; /* cij += A[i][k]*B[k][j] */
-                cij += A[i * K + k + 1] *
-                       B[(k + 1) * N + j]; /* cij += A[i][k]*B[k][j] */
-                cij += A[i * K + k + 2] *
-                       B[(k + 2) * N + j]; /* cij += A[i][k]*B[k][j] */
-                cij += A[i * K + k + 3] *
-                       B[(k + 3) * N + j]; /* cij += A[i][k]*B[k][j] */
-                // cij += A[i * K + k + 4] *
-                //       B[(k + 4) * N + j]; /* cij += A[i][k]*B[k][j] */
-                // cij += A[i * K + k + 5] *
-                //       B[(k + 5) * N + j]; /* cij += A[i][k]*B[k][j] */
-                // cij += A[i * K + k + 6] *
-                //       B[(k + 6) * N + j]; /* cij += A[i][k]*B[k][j] */
-                // cij += A[i * K + k + 7] *
-                //       B[(k + 7) * N + j]; /* cij += A[i][k]*B[k][j] */
-            }
-            C[i * N + j] = cij; /* C[i][j] = cij */
-        }
+void block_gemm(int M, int N, int K, std::vector<type_t> A, std::vector<type_t> B,
+                std::vector<type_t>& C) {
+  for (int i = 0; i < M; i = i + 1) {
+    for (int j = 0; j < N; j = j + 1) {
+      type_t cij = C[i * N + j]; /* cij = C[i][j] */
+      for (int k = 0; k < K; k = k + 4) {
+        cij += A[i * K + k] * B[k * N + j];           /* cij += A[i][k]*B[k][j] */
+        cij += A[i * K + k + 1] * B[(k + 1) * N + j]; /* cij += A[i][k]*B[k][j] */
+        cij += A[i * K + k + 2] * B[(k + 2) * N + j]; /* cij += A[i][k]*B[k][j] */
+        cij += A[i * K + k + 3] * B[(k + 3) * N + j]; /* cij += A[i][k]*B[k][j] */
+                                                      // cij += A[i * K + k + 4] *
+        //       B[(k + 4) * N + j]; /* cij += A[i][k]*B[k][j] */
+        // cij += A[i * K + k + 5] *
+        //       B[(k + 5) * N + j]; /* cij += A[i][k]*B[k][j] */
+        // cij += A[i * K + k + 6] *
+        //       B[(k + 6) * N + j]; /* cij += A[i][k]*B[k][j] */
+        // cij += A[i * K + k + 7] *
+        //       B[(k + 7) * N + j]; /* cij += A[i][k]*B[k][j] */
+      }
+      C[i * N + j] = cij; /* C[i][j] = cij */
     }
+  }
 }
 
 #if 0
@@ -83,7 +67,7 @@ void lopp_permutation_block_gemm(int                 M,
                                  int                 K,
                                  std::vector<type_t> A,
                                  std::vector<type_t> B,
-                                 std::vector<type_t> C) {
+                                 std::vector<type_t>& C) {
     type_t amk[16][16];
     for (int m = 0; m < M; m= m + 8) {
         for (int k = 0; k < K; k+=8) {
@@ -671,301 +655,275 @@ void lopp_permutation_block_gemm(int                 M,
 #else
 // 4*4 tile
 template <typename type_t>
-void lopp_permutation_block_gemm(int                 M,
-                                 int                 N,
-                                 int                 K,
-                                 std::vector<type_t> A,
-                                 std::vector<type_t> B,
-                                 std::vector<type_t> C) {
-    type_t amk[4][4];
-    for (int m = 0; m < M; m = m + 4) {
-        int mK_0 = m * K;
-        int mK_1 = mK_0 + K;
-        int mK_2 = mK_1 + K;
-        int mK_3 = mK_2 + K;
-        for (int k = 0; k < K; k += 4) {
-            int mK_0_k = mK_0 + k;
-            int mK_1_k = mK_1 + k;
-            int mK_2_k = mK_2 + k;
-            int mK_3_k = mK_3 + k;
-            amk[0][0]  = A[mK_0_k];
-            amk[0][1]  = A[mK_0_k + 1];
-            amk[0][2]  = A[mK_0_k + 2];
-            amk[0][3]  = A[mK_0_k + 3];
-            amk[1][0]  = A[mK_1_k];
-            amk[1][1]  = A[mK_1_k + 1];
-            amk[1][2]  = A[mK_1_k + 2];
-            amk[1][3]  = A[mK_1_k + 3];
-            amk[2][0]  = A[mK_2_k];
-            amk[2][1]  = A[mK_2_k + 1];
-            amk[2][2]  = A[mK_2_k + 2];
-            amk[2][3]  = A[mK_2_k + 3];
-            amk[3][0]  = A[mK_3_k];
-            amk[3][1]  = A[mK_3_k + 1];
-            amk[3][2]  = A[mK_3_k + 2];
-            amk[3][3]  = A[mK_3_k + 3];
-            int kN_0   = k * N;
-            int kN_1   = kN_0 + K;
-            int kN_2   = kN_1 + K;
-            int kN_3   = kN_2 + K;
-            for (int n = 0; n < N; n = n + 4) {
-                int kN_0_n = kN_0 + n;
-                int kN_1_n = kN_1 + n;
-                int kN_2_n = kN_2 + n;
-                int kN_3_n = kN_3 + n;
-                int mK_0_n = mK_0 + n;
-                int mK_1_n = mK_1 + n;
-                int mK_2_n = mK_2 + n;
-                int mK_3_n = mK_3 + n;
-                C[mK_0_n + 0] += amk[0][0] * B[kN_0_n];
-                C[mK_0_n + 0] += amk[0][1] * B[kN_1_n];
-                C[mK_0_n + 0] += amk[0][2] * B[kN_2_n];
-                C[mK_0_n + 0] += amk[0][3] * B[kN_3_n];
-                C[mK_0_n + 1] += amk[0][0] * B[kN_0_n + 1];
-                C[mK_0_n + 1] += amk[0][1] * B[kN_1_n + 1];
-                C[mK_0_n + 1] += amk[0][2] * B[kN_2_n + 1];
-                C[mK_0_n + 1] += amk[0][3] * B[kN_3_n + 1];
-                C[mK_0_n + 2] += amk[0][0] * B[kN_0_n + 2];
-                C[mK_0_n + 2] += amk[0][1] * B[kN_1_n + 2];
-                C[mK_0_n + 2] += amk[0][2] * B[kN_2_n + 2];
-                C[mK_0_n + 2] += amk[0][3] * B[kN_3_n + 2];
-                C[mK_0_n + 3] += amk[0][0] * B[kN_0_n + 3];
-                C[mK_0_n + 3] += amk[0][1] * B[kN_1_n + 3];
-                C[mK_0_n + 3] += amk[0][2] * B[kN_2_n + 3];
-                C[mK_0_n + 3] += amk[0][3] * B[kN_3_n + 3];
-                C[mK_1_n + 0] += amk[1][0] * B[kN_0_n];
-                C[mK_1_n + 0] += amk[1][1] * B[kN_1_n];
-                C[mK_1_n + 0] += amk[1][2] * B[kN_2_n];
-                C[mK_1_n + 0] += amk[1][3] * B[kN_3_n];
-                C[mK_1_n + 1] += amk[1][0] * B[kN_0_n + 1];
-                C[mK_1_n + 1] += amk[1][1] * B[kN_1_n + 1];
-                C[mK_1_n + 1] += amk[1][2] * B[kN_2_n + 1];
-                C[mK_1_n + 1] += amk[1][3] * B[kN_3_n + 1];
-                C[mK_1_n + 2] += amk[1][0] * B[kN_0_n + 2];
-                C[mK_1_n + 2] += amk[1][2] * B[kN_2_n + 2];
-                C[mK_1_n + 2] += amk[1][1] * B[kN_1_n + 2];
-                C[mK_1_n + 2] += amk[1][3] * B[kN_3_n + 2];
-                C[mK_1_n + 3] += amk[1][0] * B[kN_0_n + 3];
-                C[mK_1_n + 3] += amk[1][1] * B[kN_1_n + 3];
-                C[mK_1_n + 3] += amk[1][2] * B[kN_2_n + 3];
-                C[mK_1_n + 3] += amk[1][3] * B[kN_3_n + 3];
-                C[mK_2_n + 0] += amk[2][0] * B[kN_0_n];
-                C[mK_2_n + 0] += amk[2][1] * B[kN_1_n];
-                C[mK_2_n + 0] += amk[2][2] * B[kN_2_n];
-                C[mK_2_n + 0] += amk[2][3] * B[kN_3_n];
-                C[mK_2_n + 1] += amk[2][0] * B[kN_0_n + 1];
-                C[mK_2_n + 1] += amk[2][1] * B[kN_1_n + 1];
-                C[mK_2_n + 1] += amk[2][2] * B[kN_2_n + 1];
-                C[mK_2_n + 1] += amk[2][3] * B[kN_3_n + 1];
-                C[mK_2_n + 2] += amk[2][0] * B[kN_0_n + 2];
-                C[mK_2_n + 2] += amk[2][1] * B[kN_1_n + 2];
-                C[mK_2_n + 2] += amk[2][2] * B[kN_2_n + 2];
-                C[mK_2_n + 2] += amk[2][3] * B[kN_3_n + 2];
-                C[mK_2_n + 3] += amk[2][0] * B[kN_0_n + 3];
-                C[mK_2_n + 3] += amk[2][1] * B[kN_1_n + 3];
-                C[mK_2_n + 3] += amk[2][2] * B[kN_2_n + 3];
-                C[mK_2_n + 3] += amk[2][3] * B[kN_3_n + 3];
-                C[mK_3_n + 0] += amk[3][0] * B[kN_0_n];
-                C[mK_3_n + 0] += amk[3][1] * B[kN_1_n];
-                C[mK_3_n + 0] += amk[3][2] * B[kN_2_n];
-                C[mK_3_n + 0] += amk[3][3] * B[kN_3_n];
-                C[mK_3_n + 1] += amk[3][0] * B[kN_0_n + 1];
-                C[mK_3_n + 1] += amk[3][1] * B[kN_1_n + 1];
-                C[mK_3_n + 1] += amk[3][2] * B[kN_2_n + 1];
-                C[mK_3_n + 1] += amk[3][3] * B[kN_3_n + 1];
-                C[mK_3_n + 2] += amk[3][0] * B[kN_0_n + 2];
-                C[mK_3_n + 2] += amk[3][1] * B[kN_1_n + 2];
-                C[mK_3_n + 2] += amk[3][2] * B[kN_2_n + 2];
-                C[mK_3_n + 2] += amk[3][3] * B[kN_3_n + 2];
-                C[mK_3_n + 3] += amk[3][0] * B[kN_0_n + 3];
-                C[mK_3_n + 3] += amk[3][1] * B[kN_1_n + 3];
-                C[mK_3_n + 3] += amk[3][2] * B[kN_2_n + 3];
-                C[mK_3_n + 3] += amk[3][3] * B[kN_3_n + 3];
-            }
-        }
+void lopp_permutation_block_gemm(int M, int N, int K, std::vector<type_t> A, std::vector<type_t> B,
+                                 std::vector<type_t>& C) {
+  type_t amk[4][4];
+  type_t bkN[4][4];
+  for (int m = 0; m < M; m = m + 4) {
+    int mK_0 = m * K;
+    int mK_1 = mK_0 + K;
+    int mK_2 = mK_1 + K;
+    int mK_3 = mK_2 + K;
+    for (int k = 0; k < K; k += 4) {
+      int mK_0_k = mK_0 + k;
+      int mK_1_k = mK_1 + k;
+      int mK_2_k = mK_2 + k;
+      int mK_3_k = mK_3 + k;
+      amk[0][0] = A[mK_0_k];
+      amk[0][1] = A[mK_0_k + 1];
+      amk[0][2] = A[mK_0_k + 2];
+      amk[0][3] = A[mK_0_k + 3];
+      amk[1][0] = A[mK_1_k];
+      amk[1][1] = A[mK_1_k + 1];
+      amk[1][2] = A[mK_1_k + 2];
+      amk[1][3] = A[mK_1_k + 3];
+      amk[2][0] = A[mK_2_k];
+      amk[2][1] = A[mK_2_k + 1];
+      amk[2][2] = A[mK_2_k + 2];
+      amk[2][3] = A[mK_2_k + 3];
+      amk[3][0] = A[mK_3_k];
+      amk[3][1] = A[mK_3_k + 1];
+      amk[3][2] = A[mK_3_k + 2];
+      amk[3][3] = A[mK_3_k + 3];
+      int kN_0 = k * N;
+      int kN_1 = kN_0 + K;
+      int kN_2 = kN_1 + K;
+      int kN_3 = kN_2 + K;
+      for (int n = 0; n < N; n = n + 4) {
+        int kN_0_n = kN_0 + n;
+        int kN_1_n = kN_1 + n;
+        int kN_2_n = kN_2 + n;
+        int kN_3_n = kN_3 + n;
+        int mK_0_n = mK_0 + n;
+        int mK_1_n = mK_1 + n;
+        int mK_2_n = mK_2 + n;
+        int mK_3_n = mK_3 + n;
+        bkN[0][0] = B[kN_0_n];
+        bkN[0][1] = B[kN_0_n + 1];
+        bkN[0][2] = B[kN_0_n + 2];
+        bkN[0][3] = B[kN_0_n + 3];
+        bkN[1][0] = B[kN_1_n];
+        bkN[1][1] = B[kN_1_n + 1];
+        bkN[1][2] = B[kN_1_n + 2];
+        bkN[1][3] = B[kN_1_n + 3];
+        bkN[2][0] = B[kN_2_n];
+        bkN[2][1] = B[kN_2_n + 1];
+        bkN[2][2] = B[kN_2_n + 2];
+        bkN[2][3] = B[kN_2_n + 3];
+        bkN[3][0] = B[kN_3_n];
+        bkN[3][1] = B[kN_3_n + 1];
+        bkN[3][2] = B[kN_3_n + 2];
+        bkN[3][3] = B[kN_3_n + 3];
+        C[mK_0_n + 0] += amk[0][0] * bkN[0][0] + amk[0][1] * bkN[1][0] + amk[0][2] * bkN[2][0] +
+                         amk[0][3] * bkN[3][0];
+        C[mK_0_n + 1] += amk[0][0] * bkN[0][1] + amk[0][1] * bkN[1][1] + amk[0][2] * bkN[2][1] +
+                         amk[0][3] * bkN[3][1];
+        C[mK_0_n + 2] += amk[0][0] * bkN[0][2] + amk[0][1] * bkN[1][2] + amk[0][2] * bkN[2][2] +
+                         amk[0][3] * bkN[3][2];
+        C[mK_0_n + 3] += amk[0][0] * bkN[0][3] + amk[0][1] * bkN[1][3] + amk[0][2] * bkN[2][3] +
+                         amk[0][3] * bkN[3][3];
+        C[mK_1_n + 0] += amk[1][0] * bkN[0][0] + amk[1][1] * bkN[1][0] + amk[1][2] * bkN[2][0] +
+                         amk[1][3] * bkN[3][0];
+        C[mK_1_n + 1] += amk[1][0] * bkN[0][1] + amk[1][1] * bkN[1][1] + amk[1][2] * bkN[2][1] +
+                         amk[1][3] * bkN[3][1];
+        C[mK_1_n + 2] += amk[1][0] * bkN[0][2] + amk[1][2] * bkN[2][2] + amk[1][1] * bkN[1][2] +
+                         amk[1][3] * bkN[3][2];
+        C[mK_1_n + 3] += amk[1][0] * bkN[0][3] + amk[1][1] * bkN[1][3] + amk[1][2] * bkN[2][3] +
+                         amk[1][3] * bkN[3][3];
+        C[mK_2_n + 0] += amk[2][0] * bkN[0][0] + amk[2][1] * bkN[1][0] + amk[2][2] * bkN[2][0] +
+                         amk[2][3] * bkN[3][0];
+        C[mK_2_n + 1] += amk[2][0] * bkN[0][1] + amk[2][1] * bkN[1][1] + amk[2][2] * bkN[2][1] +
+                         amk[2][3] * bkN[3][1];
+        C[mK_2_n + 2] += amk[2][0] * bkN[0][2] + amk[2][1] * bkN[1][2] + amk[2][2] * bkN[2][2] +
+                         amk[2][3] * bkN[3][2];
+        C[mK_2_n + 3] += amk[2][0] * bkN[0][3] + amk[2][1] * bkN[1][3] + amk[2][2] * bkN[2][3] +
+                         amk[2][3] * bkN[3][3];
+        C[mK_3_n + 0] += amk[3][0] * bkN[0][0] + amk[3][1] * bkN[1][0] + amk[3][2] * bkN[2][0] +
+                         amk[3][3] * bkN[3][0];
+        C[mK_3_n + 1] += amk[3][0] * bkN[0][1] + amk[3][1] * bkN[1][1] + amk[3][2] * bkN[2][1] +
+                         amk[3][3] * bkN[3][1];
+        C[mK_3_n + 2] += amk[3][0] * bkN[0][2] + amk[3][1] * bkN[1][2] + amk[3][2] * bkN[2][2] +
+                         amk[3][3] * bkN[3][2];
+        C[mK_3_n + 3] += amk[3][0] * bkN[0][3] + amk[3][1] * bkN[1][3] + amk[3][2] * bkN[2][3] +
+                         amk[3][3] * bkN[3][3];
+      }
     }
+  }
 }
 #endif
 
 #define CACHE_BLOCKING_SIZE (64)
-#if 0
 template <typename type_t>
-void cache_blocking_gemm_block(
-    int M, int N, int K, type_t *A, type_t *B, type_t *C) {
-    for (int i = 0; i < CACHE_BLOCKING_SIZE; i = i + 1) {
-        for (int j = 0; j < CACHE_BLOCKING_SIZE; j = j + 1) {
-            type_t cij = C[i * N + j]; /* cij = C[i][j] */
-            for (int k = 0; k < CACHE_BLOCKING_SIZE; k = k + 4) {
-                cij += A[i * K + k] * B[k * N + j]; /* cij += A[i][k]*B[k][j] */
-                cij += A[i * K + k + 1] *
-                       B[(k + 1) * N + j]; /* cij += A[i][k]*B[k][j] */
-                cij += A[i * K + k + 2] *
-                       B[(k + 2) * N + j]; /* cij += A[i][k]*B[k][j] */
-                cij += A[i * K + k + 3] *
-                       B[(k + 3) * N + j]; /* cij += A[i][k]*B[k][j] */
-            }
-            C[i * N + j] = cij; /* C[i][j] = cij */
-        }
+void cache_blocking_gemm_block(int M, int N, int K, type_t* A, type_t* B, type_t* C) {
+  for (int i = 0; i < CACHE_BLOCKING_SIZE; i = i + 1) {
+    for (int j = 0; j < CACHE_BLOCKING_SIZE; j = j + 1) {
+      type_t cij = C[i * N + j]; /* cij = C[i][j] */
+      for (int k = 0; k < CACHE_BLOCKING_SIZE; k = k + 4) {
+        cij += A[i * K + k] * B[k * N + j];           /* cij += A[i][k]*B[k][j] */
+        cij += A[i * K + k + 1] * B[(k + 1) * N + j]; /* cij += A[i][k]*B[k][j] */
+        cij += A[i * K + k + 2] * B[(k + 2) * N + j]; /* cij += A[i][k]*B[k][j] */
+        cij += A[i * K + k + 3] * B[(k + 3) * N + j]; /* cij += A[i][k]*B[k][j] */
+      }
+      C[i * N + j] = cij; /* C[i][j] = cij */
     }
-}
-#endif
-
-template <typename type_t>
-void cache_blocking_gemm_block(
-    int M, int N, int K, type_t *A, type_t *B, type_t *C) {
-    type_t amk[4][4];
-    for (int m = 0; m < CACHE_BLOCKING_SIZE; m = m + 4) {
-        for (int k = 0; k < CACHE_BLOCKING_SIZE; k += 4) {
-            amk[0][0] = A[m * K + k];
-            amk[0][1] = A[m * K + k + 1];
-            amk[0][2] = A[m * K + k + 2];
-            amk[0][3] = A[m * K + k + 3];
-            amk[1][0] = A[(m + 0) * K + k];
-            amk[1][1] = A[(m + 1) * K + k + 1];
-            amk[1][2] = A[(m + 2) * K + k + 2];
-            amk[1][3] = A[(m + 3) * K + k + 3];
-            amk[2][0] = A[(m + 0) * K + k];
-            amk[2][1] = A[(m + 1) * K + k + 1];
-            amk[2][2] = A[(m + 2) * K + k + 2];
-            amk[2][3] = A[(m + 3) * K + k + 3];
-            amk[3][0] = A[(m + 0) * K + k];
-            amk[3][1] = A[(m + 1) * K + k + 1];
-            amk[3][2] = A[(m + 2) * K + k + 2];
-            amk[3][3] = A[(m + 3) * K + k + 3];
-            for (int n = 0; n < CACHE_BLOCKING_SIZE; n = n + 4) {
-                C[m * n + n] += amk[0][0] * B[k * N + n];
-                C[m * n + n + 1] += amk[0][0] * B[k * N + n + 1];
-                C[m * n + n + 2] += amk[0][0] * B[k * N + n + 2];
-                C[m * n + n + 3] += amk[0][0] * B[k * N + n + 3];
-                C[(m + 1) * n + n + 0] += amk[1][0] * B[k * N + n];
-                C[(m + 1) * n + n + 1] += amk[1][0] * B[k * N + n + 1];
-                C[(m + 1) * n + n + 2] += amk[1][0] * B[k * N + n + 2];
-                C[(m + 1) * n + n + 3] += amk[1][0] * B[k * N + n + 3];
-                C[(m + 2) * n + n + 0] += amk[2][0] * B[k * N + n];
-                C[(m + 2) * n + n + 1] += amk[2][0] * B[k * N + n + 1];
-                C[(m + 2) * n + n + 2] += amk[2][0] * B[k * N + n + 2];
-                C[(m + 2) * n + n + 3] += amk[2][0] * B[k * N + n + 3];
-                C[(m + 3) * n + n + 0] += amk[3][0] * B[k * N + n];
-                C[(m + 3) * n + n + 1] += amk[3][0] * B[k * N + n + 1];
-                C[(m + 3) * n + n + 2] += amk[3][0] * B[k * N + n + 2];
-                C[(m + 3) * n + n + 3] += amk[3][0] * B[k * N + n + 3];
-            }
-        }
-    }
+  }
 }
 
 template <typename type_t>
-void cache_blocking_gemm(int                 M,
-                         int                 N,
-                         int                 K,
-                         std::vector<type_t> A,
-                         std::vector<type_t> B,
-                         std::vector<type_t> C) {
-    for (int m = 0; m < M; m = m + CACHE_BLOCKING_SIZE) {
-        for (int n = 0; n < N; n = n + CACHE_BLOCKING_SIZE) {
-            for (int k = 0; k < K; k = k + CACHE_BLOCKING_SIZE) {
-                cache_blocking_gemm_block(M,
-                                          N,
-                                          K,
-                                          &A[CACHE_BLOCKING_SIZE * m + k],
+void cache_blocking_gemm(int M, int N, int K, std::vector<type_t> A, std::vector<type_t> B,
+                         std::vector<type_t>& C) {
+  for (int m = 0; m < M; m = m + CACHE_BLOCKING_SIZE) {
+    for (int k = 0; k < K; k = k + CACHE_BLOCKING_SIZE) {
+      for (int n = 0; n < N; n = n + CACHE_BLOCKING_SIZE) {
+        cache_blocking_gemm_block<type_t>(M, N, K, m, n, k, &A[CACHE_BLOCKING_SIZE * m + k],
                                           &B[CACHE_BLOCKING_SIZE * k + n],
                                           &C[CACHE_BLOCKING_SIZE * m + n]);
-            }
-        }
+      }
     }
+  }
 }
 
 template <typename type_t>
-void cache_write_gemm(int                 M,
-                      int                 N,
-                      int                 K,
-                      std::vector<type_t> A,
-                      std::vector<type_t> B,
-                      std::vector<type_t> C) {
-    type_t temp[N];
-    for (int i = 0; i < M; ++i) {
-        for (int j = 0; j < N; ++j) {
-            type_t cij = C[i * N + j]; /* cij = C[i][j] */
-            for (int k = 0; k < K; k++)
-                cij += A[i * K + k] * B[k * N + j]; /* cij += A[i][k]*B[k][j] */
-            // C[i * N + j] = cij;                     /* C[i][j] = cij */
-            temp[j] = cij;
-        }
-        memcpy(&C[i * N], temp, N);
+void cache_write_gemm(int M, int N, int K, std::vector<type_t> A, std::vector<type_t> B,
+                      std::vector<type_t>& C) {
+  type_t temp[N];
+  for (int i = 0; i < M; ++i) {
+    for (int j = 0; j < N; ++j) {
+      type_t cij = C[i * N + j];                                      /* cij = C[i][j] */
+      for (int k = 0; k < K; k++) cij += A[i * K + k] * B[k * N + j]; /* cij += A[i][k]*B[k][j] */
+      // C[i * N + j] = cij;                     /* C[i][j] = cij */
+      temp[j] = cij;
     }
+    memcpy(&C[i * N], temp, N);
+  }
 }
 
 template <typename type_t>
-void openmp_gemm(int                 M,
-                 int                 N,
-                 int                 K,
-                 std::vector<type_t> A,
-                 std::vector<type_t> B,
-                 std::vector<type_t> C) {
-    for (int i = 0; i < M; ++i) {
+void openmp_gemm(int M, int N, int K, std::vector<type_t> A, std::vector<type_t> B,
+                 std::vector<type_t>& C) {
+  for (int i = 0; i < M; ++i) {
 #pragma omp parallel for
-        for (int j = 0; j < N; ++j) {
-            type_t cij = C[i * N + j]; /* cij = C[i][j] */
-            for (int k = 0; k < K; k++)
-                cij += A[i * K + k] * B[k * N + j]; /* cij += A[i][k]*B[k][j] */
-            C[i * N + j] = cij;                     /* C[i][j] = cij */
-        }
+    for (int j = 0; j < N; ++j) {
+      type_t cij = C[i * N + j];                                      /* cij = C[i][j] */
+      for (int k = 0; k < K; k++) cij += A[i * K + k] * B[k * N + j]; /* cij += A[i][k]*B[k][j] */
+      C[i * N + j] = cij;                                             /* C[i][j] = cij */
     }
+  }
 }
 
+#if 1
 // 2*2 tile
 template <typename type_t>
-void tile_2x2_gemm(int                 M,
-                   int                 N,
-                   int                 K,
-                   std::vector<type_t> A,
-                   std::vector<type_t> B,
-                   std::vector<type_t> C) {
-    type_t amk[2][2];
-    type_t bkn[2][2];
-    type_t cmn[2][2];
-    for (int m = 0; m < M; m = m + 2) {
-        int mK_0 = m * K;
-        int mK_1 = mK_0 + K;
-        for (int k = 0; k < K; k += 2) {
-            int mK_0_k = mK_0 + k;
-            int mK_1_k = mK_1 + k;
-            amk[0][0]  = A[mK_0_k];
-            amk[0][1]  = A[mK_0_k + 1];
-            amk[1][0]  = A[mK_1_k];
-            amk[1][1]  = A[mK_1_k + 1];
-            int kN_0   = k * N;
-            int kN_1   = kN_0 + K;
-            for (int n = 0; n < N; n = n + 2) {
-                int kN_0_n = kN_0 + n;
-                int kN_1_n = kN_1 + n;
-                int mK_0_n = mK_0 + n;
-                int mK_1_n = mK_1 + n;
-                bkn[0][0]  = B[kN_0_n];
-                bkn[1][0]  = B[kN_1_n];
-                bkn[0][1]  = B[kN_0_n + 1];
-                bkn[1][1]  = B[kN_1_n + 1];
-                cmn[0][0]  = C[mK_0_n + 0];
-                cmn[1][0]  = C[mK_0_n + 1];
-                cmn[0][1]  = C[mK_1_n + 0];
-                cmn[1][1]  = C[mK_1_n + 1];
-                // if change the following line's order. the speed will be
-                // slower,but may be faster if using vector
-                cmn[0][0] += amk[0][0] * bkn[0][0];
-                cmn[0][0] += amk[0][1] * bkn[1][0];
-                cmn[0][1] += amk[0][0] * bkn[0][1];
-                cmn[0][1] += amk[0][1] * bkn[1][1];
-                cmn[1][0] += amk[1][0] * bkn[1][0];
-                cmn[1][0] += amk[1][1] * bkn[1][0];
-                cmn[1][1] += amk[1][0] * bkn[0][1];
-                cmn[1][1] += amk[1][1] * bkn[1][1];
-                C[mK_0_n + 0] = cmn[0][0];
-                C[mK_0_n + 1] = cmn[1][0];
-                C[mK_1_n + 0] = cmn[0][1];
-                C[mK_1_n + 1] = cmn[1][1];
-            }
-        }
+void tile_2x2_gemm(int M, int N, int K, std::vector<type_t> A, std::vector<type_t> B,
+                   std::vector<type_t>& C) {
+  // type_t amk[2][2];
+  // type_t bkn[2][2];
+  register type_t amk_00;
+  register type_t amk_01;
+  register type_t amk_10;
+  register type_t amk_11;
+  register type_t bkn_00;
+  register type_t bkn_01;
+  register type_t bkn_10;
+  register type_t bkn_11;
+  type_t cmn[2][2];
+  for (int m = 0; m < M; m = m + 2) {
+    int mK_0 = m * K;
+    int mK_1 = mK_0 + K;
+    for (int k = 0; k < K; k += 2) {
+      int mK_0_k = mK_0 + k;
+      int mK_1_k = mK_1 + k;
+      amk_00 = A[mK_0_k];
+      amk_01 = A[mK_0_k + 1];
+      amk_10 = A[mK_1_k];
+      amk_11 = A[mK_1_k + 1];
+      int kN_0 = k * N;
+      int kN_1 = kN_0 + K;
+      cmn[0][0] = 0;
+      cmn[1][0] = 0;
+      cmn[0][1] = 0;
+      cmn[1][1] = 0;
+      for (int n = 0; n < N; n = n + 2) {
+        int kN_0_n = kN_0 + n;
+        int kN_1_n = kN_1 + n;
+        int mK_0_n = mK_0 + n;
+        int mK_1_n = mK_1 + n;
+        bkn_00 = B[kN_0_n];
+        bkn_10 = B[kN_1_n];
+        bkn_01 = B[kN_0_n + 1];
+        bkn_11 = B[kN_1_n + 1];
+        C[mK_0_n + 0] += amk_00 * bkn_00 + amk_01 * bkn_10;
+        C[mK_0_n + 1] += amk_00 * bkn_01 + amk_01 * bkn_11;
+        C[mK_1_n + 0] += amk_10 * bkn_00 + amk_11 * bkn_10;
+        C[mK_1_n + 1] += amk_10 * bkn_01 + amk_11 * bkn_11;
+      }
     }
+  }
 }
+#else
+// 2*2 tile
+template <typename type_t>
+void tile_2x2_gemm(int M, int N, int K, std::vector<type_t> A, std::vector<type_t> B,
+                   std::vector<type_t>& C) {
+  type_t amk[2][2];
+  type_t bkn[2][2];
+  type_t cmn[2][2];
+  for (int m = 0; m < M; m = m + 2) {
+    int mK_0 = m * K;
+    int mK_1 = mK_0 + K;
+    for (int n = 0; n < N; n = n + 2) {
+      int mK_0_n = mK_0 + n;
+      int mK_1_n = mK_1 + n;
+      // register type_t tmp_00  = 0;
+      // register type_t tmp_01  = 0;
+      // register type_t tmp_10  = 0;
+      // register type_t tmp_11  = 0;
+      type_t tmp_00 = 0;
+      type_t tmp_01 = 0;
+      type_t tmp_10 = 0;
+      type_t tmp_11 = 0;
+      cmn[0][0] = C[mK_0_n + 0];
+      cmn[1][0] = C[mK_0_n + 1];
+      cmn[0][1] = C[mK_1_n + 0];
+      cmn[1][1] = C[mK_1_n + 1];
+      for (int k = 0; k < K; k += 2) {
+        int mK_0_k = mK_0 + k;
+        int mK_1_k = mK_1 + k;
+        int kN_0 = k * N;
+        int kN_1 = kN_0 + K;
+        int kN_0_n = kN_0 + n;
+        int kN_1_n = kN_1 + n;
+        amk[0][0] = A[mK_0_k];
+        amk[0][1] = A[mK_0_k + 1];
+        amk[1][0] = A[mK_1_k];
+        amk[1][1] = A[mK_1_k + 1];
+        bkn[0][0] = B[kN_0_n];
+        bkn[0][1] = B[kN_0_n + 1];
+        bkn[1][0] = B[kN_1_n];
+        bkn[1][1] = B[kN_1_n + 1];
+        // if change the following line's order. the speed will be
+        // slower,but may be faster if using vector
+
+        // type_t aaa_00 = 0;
+        // type_t aaa_01 = 0;
+        // type_t aaa_10 = 0;
+        // type_t aaa_11 = 0;
+        tmp_00 += amk[0][0] * bkn[0][0] + amk[0][1] * bkn[1][0];
+        tmp_01 += amk[0][0] * bkn[0][1] + amk[0][1] * bkn[1][1];
+        tmp_10 += amk[1][0] * bkn[0][0] + amk[1][1] * bkn[1][0];
+        tmp_11 += amk[1][0] * bkn[0][1] + amk[1][1] * bkn[1][1];
+        // tmp_00 += aaa_00;
+        // tmp_01 += aaa_01;
+        // tmp_10 += aaa_10;
+        // tmp_11 += aaa_11;
+      }
+      C[mK_0_n + 0] = tmp_00;
+      C[mK_0_n + 1] = tmp_01;
+      C[mK_1_n + 0] = tmp_10;
+      C[mK_1_n + 1] = tmp_11;
+    }
+  }
+}
+#endif
 
 #endif /* TEST_SET_H */
